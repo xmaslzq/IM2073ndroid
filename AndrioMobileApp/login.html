@@ -13,14 +13,14 @@
             padding: 0;
             font-family: 'Poppins', sans-serif;
         }
-
         body {
-            background: linear-gradient(to right, #4A90E2, #50C9C3);
+            background: linear-gradient(to right, #6A11CB, #2575FC);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
         }
+
 
         .login-container {
             background: white;
@@ -126,20 +126,3 @@
         alert(errorMessage);
     }
 </script>
-<!--  <script>
-        document.getElementById("loginForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-
-            fetch("http://localhost:8080/api/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ username, password })
-            })
-            .then(response => response.json())
-        
-    </script>//
