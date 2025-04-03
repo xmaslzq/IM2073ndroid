@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Results</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            display: inline-block;
+            width: 90%;
+            max-width: 900px;
+        }
+        canvas {
+            width: 100% !important;
+            height: 500px !important;
+        }
+        h2 {
+            font-size: 2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Live Voting Results</h2>
+        <canvas id="voteChart"></canvas>
+    </div>
+    <script>
+        const socket = io('http://localhost:3000');
+        const ctx = document.getElementById("voteChart").getContext("2d");
+        let voteData = {
+            labels: ["A", "B", "C"],
+            datasets: [{
+                label: "Votes",
+                data: [0, 0, 0],
+                backgroundColor: ["#4CAF50", "#FF5733", "#3498DB"],
+            }]
+        };
+        let voteChart = new Chart(ctx, {
+            type: "bar",
+            data: voteData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { font: { size: 20 } }
+                    },
+                    x: {
+                        ticks: { font: { size: 20 } }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { font: { size: 20 } } }
+                }
+            }
+        });
+
+        socket.on('updateVotes', (votes) => {
+            voteChart.data.datasets[0].data = [votes.A, votes.B, votes.C];
+            voteChart.update();
+        });
+    </script>
+</body>
+</html>
