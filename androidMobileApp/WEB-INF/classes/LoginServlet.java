@@ -26,7 +26,7 @@ public class LoginServlet extends HttpServlet {
                 // Step 1: Allocate a database connection
                 Connection conn = DriverManager.getConnection(
                         "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC",
-                        "myuser", "xxxx");  // Replace with your database credentials
+                        "root", "xxxx");  // Replace with your database credentials
 
                 //Prepare SQL statement to check credentials
                 PreparedStatement stmt = conn.prepareStatement(
@@ -40,7 +40,7 @@ public class LoginServlet extends HttpServlet {
                 // Valid credentials, create a session
                 HttpSession session = request.getSession();
                 session.setAttribute("username", username);
-                response.sendRedirect("Home.html");  // Redirect to homepage
+                response.sendRedirect("Votepage.html");  // Redirect to homepage
             } else {
                 // Invalid credentials, redirect with an error message
                 response.sendRedirect("login.html?error=Invalid username or password");

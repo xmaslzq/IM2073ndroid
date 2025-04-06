@@ -28,7 +28,7 @@ public class CheckRegistrationServlet extends HttpServlet {
          // Step 1: Allocate a database 'Connection' object
          Connection conn = DriverManager.getConnection(
                "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC",
-               "myuser", "xxxx");   // Replace with your actual database credentials
+               "root", "xxxx");   // Replace with your actual database credentials
 
          // Step 2: Allocate a 'PreparedStatement' object
          PreparedStatement checkStmt = conn.prepareStatement(
@@ -55,8 +55,8 @@ public class CheckRegistrationServlet extends HttpServlet {
             int rowsAffected = insertStmt.executeUpdate();
 
             if (rowsAffected > 0) {
-               // Redirect to home.html after successful registration
-               response.sendRedirect("Home.html");
+               // Redirect to Votepage.html after successful registration
+               response.sendRedirect("Votepage.html");
                return;  // Stop further execution
             } else {
                response.sendRedirect("register.html?error=Data insertion failed");

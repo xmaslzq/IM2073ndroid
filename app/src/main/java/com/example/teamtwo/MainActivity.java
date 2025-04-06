@@ -1,67 +1,72 @@
-package com.example.clickerapp;
+package com.example.teamtwo;
 
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView selectedOptionText;
-    private Button buttonOption1, buttonOption2, buttonOption3;
+    private static final String SERVER_URL = "http://localhost:8080/androidMobileApp/select";  // Adjust the URL
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize views
-        selectedOptionText = findViewById(R.id.selectedOptionText);
-        buttonOption1 = findViewById(R.id.buttonOption1);
-        buttonOption2 = findViewById(R.id.buttonOption2);
-        buttonOption3 = findViewById(R.id.buttonOption3);
+        Button buttonA = findViewById(R.id.buttonA);
+        Button buttonB = findViewById(R.id.buttonB);
+        Button buttonC = findViewById(R.id.buttonC);
 
-        // Set click listeners for the buttons
-        buttonOption1.setOnClickListener(new View.OnClickListener() {
+        buttonA.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectedOptionText.setText("You chose: Option 1");
-                displayInHTML("You chose: Option 1");
+                sendVote("A");
+                Toast.makeText(MainActivity.this, "You chose A", Toast.LENGTH_SHORT).show();
             }
         });
 
-        buttonOption2.setOnClickListener(new View.OnClickListener() {
+        buttonB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectedOptionText.setText("You chose: Option 2");
-                displayInHTML("You chose: Option 2");
+                sendVote("B");
+                Toast.makeText(MainActivity.this, "You chose B", Toast.LENGTH_SHORT).show();
             }
         });
 
-        buttonOption3.setOnClickListener(new View.OnClickListener() {
+        buttonC.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectedOptionText.setText("You chose: Option 3");
-                displayInHTML("You chose: Option 3");
+                sendVote("C");
+                Toast.makeText(MainActivity.this, "You chose C", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // Method to simulate showing the result in HTML format
-    private void displayInHTML(String result) {
-        // Here, you'd typically use a WebView or pass data to an actual HTML file in your assets.
-        // This is just a simulation.
+    private void sendVote(String choice) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(SERVER_URL + "?choice=" + choice);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setDoOutput(true);
+                    connection.connect();
 
-        // In a real-world scenario, you could use a WebView to show HTML content
-        // or load HTML content dynamically.
-
-        String htmlContent = "<html><body><h2>" + result + "</h2></body></html>";
-
-        // Show the HTML content using WebView
-        WebView webView = new WebView(this);
-        setContentView(webView);
-        webView.loadData(htmlContent, "text/html", "UTF-8");
+                    // Get response code (for debugging purposes)
+                    int responseCode = connection.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        // Successfully sent vote to the server
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }
