@@ -57,6 +57,11 @@
         button:hover {
             background-color: #45a049;
         }
+        #endMessage {
+            font-size: 1.5em;
+            color: #FF0000;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -71,6 +76,7 @@
 
     <canvas id="voteChart"></canvas>
     <button id="nextQuestionButton">Next Question</button>
+    <p id="endMessage" style="display: none;">End of the Quiz!</p>
 </div>
 
 <script>
@@ -99,6 +105,13 @@
         fetch(`http://localhost:9999/androidMobileApp/display?questionNo=${questionNo}`)
             .then(res => res.json())
             .then(data => {
+                if (data.end) {
+                    // No more questions
+                    document.getElementById('endMessage').style.display = 'block';
+                    document.getElementById('nextQuestionButton').disabled = true;
+                    return;
+                }
+
                 document.getElementById('questionText').textContent = data.questionText;
 
                 // Update the vote chart
@@ -141,3 +154,4 @@
 </script>
 </body>
 </html>
+

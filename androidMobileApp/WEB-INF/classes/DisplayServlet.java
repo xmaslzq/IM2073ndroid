@@ -28,19 +28,17 @@ public class DisplayServlet extends HttpServlet {
                 questionStatement.setInt(1, questionNo);
                 ResultSet questionResult = questionStatement.executeQuery();
 
-                String questionText = "";
-                String optionA = "";
-                String optionB = "";
-                String optionC = "";
-                String optionD = "";
-
-                if (questionResult.next()) {
-                    questionText = questionResult.getString("questionText");
-                    optionA = questionResult.getString("optionA");
-                    optionB = questionResult.getString("optionB");
-                    optionC = questionResult.getString("optionC");
-                    optionD = questionResult.getString("optionD");
+                if (!questionResult.next()) {
+                    // No more questions, return an "end" message
+                    response.getWriter().write("{\"end\": true}");
+                    return;
                 }
+
+                String questionText = questionResult.getString("questionText");
+                String optionA = questionResult.getString("optionA");
+                String optionB = questionResult.getString("optionB");
+                String optionC = questionResult.getString("optionC");
+                String optionD = questionResult.getString("optionD");
 
                 // Fetch the vote counts for choices A, B, C, D
                 String voteSql = "SELECT choice, COUNT(*) AS count FROM responses WHERE questionNo=? GROUP BY choice";
