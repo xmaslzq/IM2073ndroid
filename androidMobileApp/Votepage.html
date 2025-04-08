@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voting Results</title>
-    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -34,61 +33,111 @@
             margin-bottom: 30px;
             color: #333;
         }
+        .options {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 1.2em;
+        }
+        .option {
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Live Voting Results</h2>
-        <h3 id="questionText">Loading question...</h3> <!-- Display questions -->
-        <canvas id="voteChart"></canvas>
+<div class="container">
+    <h2>Live Voting Results</h2>
+    <h3 id="questionText">Loading question...</h3> <!-- Display question here -->
+
+    <!-- Options container -->
+    <div id="optionsContainer" class="options">
+        <!-- Options will be dynamically added here -->
     </div>
 
-    <script>
-        const socket = io('http://localhost:3000');
-        const ctx = document.getElementById("voteChart").getContext("2d");
+    <canvas id="voteChart"></canvas>
+    <button id="nextQuestionButton">Next Question</button>
+</div>
 
-        // Set up chart data
-        let voteData = {
-            labels: ["A", "B", "C"],
+<script>
+    let currentQuestionNo = 1; // Initial question number
+
+    // Chart.js setup
+    const ctx = document.getElementById('voteChart').getContext('2d');
+    const voteChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['A', 'B', 'C', 'D'],
             datasets: [{
-                label: "Votes",
-                data: [0, 0, 0],
-                backgroundColor: ["#4CAF50", "#FF5733", "#3498DB"],
+                label: 'Votes',
+                data: [0, 0, 0, 0],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#000000']
             }]
-        };
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
 
-        // Create the chart
-        let voteChart = new Chart(ctx, {
-            type: "bar",
-            data: voteData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { font: { size: 20 } }
-                    },
-                    x: {
-                        ticks: { font: { size: 20 } }
-                    }
-                },
-                plugins: {
-                    legend: { labels: { font: { size: 20 } } }
-                }
-            }
-        });
+    // Function to fetch and display the current question, options, and vote data
+    function fetchVotes(questionNo) {
+        fetch(`http://localhost:9999/androidMobileApp/display?questionNo=${questionNo}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('questionText').textContent = data.questionText;
 
-        // Listen for updates from server
-        socket.on('updateVotes', (data) => {
-            voteChart.data.datasets[0].data = [data.votes.A, data.votes.B, data.votes.C];
-            voteChart.update();
+                // Update the vote chart
+                voteChart.data.datasets[0].data = [
+                    data.votes.A || 0,
+                    data.votes.B || 0,
+                    data.votes.C || 0,
+                    data.votes.D || 0
+                ];
+                voteChart.update();
 
-            // Update the question
-            if (data.question) {
-                document.getElementById("questionText").textContent = data.question;
-            }
-        });
-    </script>
+                // Dynamically populate options
+                const optionsContainer = document.getElementById('optionsContainer');
+                optionsContainer.innerHTML = '';  // Clear previous options
+                const options = ['A', 'B', 'C', 'D'];
+
+                options.forEach(option => {
+                    const optionElement = document.createElement('div');
+                    optionElement.classList.add('option');
+                    optionElement.textContent = `${option}: ${data[`option${option}`]}`;
+                    optionsContainer.appendChild(optionElement);
+                });
+            })
+            .catch(err => {
+                console.error("Error fetching question data:", err);
+            });
+    }
+
+    // Event listener for the "Next Question" button
+    document.getElementById('nextQuestionButton').addEventListener('click', () => {
+        // Increment the current question number
+        currentQuestionNo++;
+
+        // Fetch and display the next question
+        fetchVotes(currentQuestionNo);
+    });
+
+    // Initial fetch for the first question
+    fetchVotes(currentQuestionNo);
+</script>
 </body>
 </html>
