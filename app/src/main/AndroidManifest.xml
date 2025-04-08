@@ -7,7 +7,8 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="Clicker App"
-        android:theme="@style/CustomTheme">
+        android:theme="@style/CustomTheme"
+        android:networkSecurityConfig="@xml/network_security_config">
 
         <!-- Main Activity -->
         <activity android:name=".MainActivity"

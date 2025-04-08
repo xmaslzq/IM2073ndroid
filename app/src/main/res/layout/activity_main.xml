@@ -4,9 +4,22 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/background"
-    android:padding="8dp"
+    android:padding="16dp"
     android:gravity="center">
 
+    <!-- Question TextView -->
+    <TextView
+        android:id="@+id/textViewQuestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Q1: Sample question text"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:paddingBottom="16dp" />
+
+    <!-- Choice A -->
     <Button
         android:id="@+id/buttonChoiceA"
         android:layout_width="match_parent"
@@ -17,6 +30,7 @@
         android:textAppearance="@style/ButtonText"
         android:onClick="onChoiceClick" />
 
+    <!-- Choice B -->
     <Button
         android:id="@+id/buttonChoiceB"
         android:layout_width="match_parent"
@@ -27,6 +41,7 @@
         android:textAppearance="@style/ButtonText"
         android:onClick="onChoiceClick" />
 
+    <!-- Choice C -->
     <Button
         android:id="@+id/buttonChoiceC"
         android:layout_width="match_parent"
@@ -37,6 +52,7 @@
         android:textAppearance="@style/ButtonText"
         android:onClick="onChoiceClick" />
 
+    <!-- Choice D -->
     <Button
         android:id="@+id/buttonChoiceD"
         android:layout_width="match_parent"
