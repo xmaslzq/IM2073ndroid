@@ -63,4 +63,16 @@
         android:textAppearance="@style/ButtonText"
         android:onClick="onChoiceClick" />
 
+    <!-- Next Question Button -->
+    <Button
+        android:id="@+id/buttonNext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Next Question"
+        android:backgroundTint="@android:color/holo_blue_light"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:onClick="onNextQuestion"
+        android:layout_marginTop="16dp" />
+
 </LinearLayout>
