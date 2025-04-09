@@ -7,6 +7,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Handler;
+import android.os.Looper;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -16,20 +18,25 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
-    private int questionNo = 1; // default fallback
-    private String serverIp = "10.0.2.2"; // Use emulator IP for local server
-    private String serverPort = "9999";   // Your actual port
+    private int questionNo = 1;
+    private String serverIp = "10.0.2.2";
+    private String serverPort = "9999";
+
+    private Handler timerHandler = new Handler();
+    private Runnable timerRunnable;
+    private int timeRemaining = 0;
+
+    private TextView timerView; // ✨ For countdown display
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Fetch the first question
+        timerView = findViewById(R.id.textViewTimer); // ✨ Assume this TextView exists in your layout
         fetchQuestionFromServer(questionNo);
     }
 
-    // Function to fetch question from server
     private void fetchQuestionFromServer(int questionNo) {
         new Thread(() -> {
             try {
@@ -52,16 +59,15 @@ public class MainActivity extends AppCompatActivity {
 
                 if (json.has("end")) {
                     runOnUiThread(() -> {
-                        // Display "End of quiz" message
                         TextView questionView = findViewById(R.id.textViewQuestion);
                         questionView.setText("End of quiz.");
 
-                        // Disable and hide the options and Next button
                         findViewById(R.id.buttonChoiceA).setVisibility(View.GONE);
                         findViewById(R.id.buttonChoiceB).setVisibility(View.GONE);
                         findViewById(R.id.buttonChoiceC).setVisibility(View.GONE);
                         findViewById(R.id.buttonChoiceD).setVisibility(View.GONE);
-                        findViewById(R.id.buttonNext).setVisibility(View.GONE); // Optionally hide the Next button
+                        findViewById(R.id.buttonNext).setVisibility(View.GONE);
+                        timerView.setVisibility(View.GONE); // Hide timer
                     });
                     return;
                 }
@@ -71,9 +77,9 @@ public class MainActivity extends AppCompatActivity {
                 String optionB = json.getString("optionB");
                 String optionC = json.getString("optionC");
                 String optionD = json.getString("optionD");
+                timeRemaining = json.getInt("timeRemaining"); // ✨ Get timer from server
 
                 runOnUiThread(() -> {
-                    // Update question and options
                     TextView questionView = findViewById(R.id.textViewQuestion);
                     questionView.setText("Q" + questionNo + ": " + questionText);
 
@@ -82,12 +88,14 @@ public class MainActivity extends AppCompatActivity {
                     ((Button) findViewById(R.id.buttonChoiceC)).setText("C: " + optionC);
                     ((Button) findViewById(R.id.buttonChoiceD)).setText("D: " + optionD);
 
-                    // Make sure options are visible when a new question is fetched
                     findViewById(R.id.buttonChoiceA).setVisibility(View.VISIBLE);
                     findViewById(R.id.buttonChoiceB).setVisibility(View.VISIBLE);
                     findViewById(R.id.buttonChoiceC).setVisibility(View.VISIBLE);
                     findViewById(R.id.buttonChoiceD).setVisibility(View.VISIBLE);
                     findViewById(R.id.buttonNext).setVisibility(View.VISIBLE);
+                    timerView.setVisibility(View.VISIBLE);
+
+                    startTimerCountdown(); // ✨ Start countdown
                 });
 
             } catch (Exception e) {
@@ -96,22 +104,45 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    // Handle vote choice button clicks
+    // ✨ Countdown timer logic
+    private void startTimerCountdown() {
+        if (timerRunnable != null) {
+            timerHandler.removeCallbacks(timerRunnable);
+        }
+
+        timerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (timeRemaining > 0) {
+                    timerView.setText("Time left: " + timeRemaining + "s");
+                    timeRemaining--;
+                    timerHandler.postDelayed(this, 1000);
+                } else {
+                    timerView.setText("Time's up!");
+                    disableChoices();
+                }
+            }
+        };
+        timerHandler.post(timerRunnable);
+    }
+
+    // ✨ Disable voting after time is up
+    private void disableChoices() {
+        findViewById(R.id.buttonChoiceA).setEnabled(false);
+        findViewById(R.id.buttonChoiceB).setEnabled(false);
+        findViewById(R.id.buttonChoiceC).setEnabled(false);
+        findViewById(R.id.buttonChoiceD).setEnabled(false);
+    }
+
     public void onChoiceClick(View view) {
         String choice = "";
 
         int id = view.getId();
-        if (id == R.id.buttonChoiceA) {
-            choice = "a";
-        } else if (id == R.id.buttonChoiceB) {
-            choice = "b";
-        } else if (id == R.id.buttonChoiceC) {
-            choice = "c";
-        } else if (id == R.id.buttonChoiceD) {
-            choice = "d";
-        }
+        if (id == R.id.buttonChoiceA) choice = "a";
+        else if (id == R.id.buttonChoiceB) choice = "b";
+        else if (id == R.id.buttonChoiceC) choice = "c";
+        else if (id == R.id.buttonChoiceD) choice = "d";
 
-        // Get question number from TextView (e.g. "Q8: What is Java?")
         TextView questionTextView = findViewById(R.id.textViewQuestion);
         String text = questionTextView.getText().toString();
         String questionNoStr = text.split(":")[0].replaceAll("[^0-9]", "");
@@ -125,7 +156,6 @@ public class MainActivity extends AppCompatActivity {
         sendChoiceToServer(choice, questionNo);
     }
 
-    // Function to send the vote to the server
     private void sendChoiceToServer(String choice, int questionNo) {
         new Thread(() -> {
             try {
@@ -136,9 +166,8 @@ public class MainActivity extends AppCompatActivity {
                 URL url = new URL(fullUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
-                int responseCode = connection.getResponseCode();
+                connection.getResponseCode();
 
-                // Optional: Log server response
                 BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 StringBuilder response = new StringBuilder();
                 String line;
@@ -147,7 +176,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 reader.close();
 
-                // Show a toast on the main thread after sending vote
                 runOnUiThread(() -> {
                     Toast.makeText(MainActivity.this, "Vote for question #" + questionNo + " recorded.", Toast.LENGTH_SHORT).show();
                 });
@@ -158,9 +186,8 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    // Handle the Next Question button click
     public void onNextQuestion(View view) {
         questionNo++;
-        fetchQuestionFromServer(questionNo);  // Fetch and display the next question
+        fetchQuestionFromServer(questionNo);
     }
 }

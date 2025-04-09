@@ -7,6 +7,16 @@
     android:padding="16dp"
     android:gravity="center">
 
+    <!-- Time -->
+    <TextView
+        android:id="@+id/textViewTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Time left: 60s"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp" />
+
+
     <!-- Question TextView -->
     <TextView
         android:id="@+id/textViewQuestion"

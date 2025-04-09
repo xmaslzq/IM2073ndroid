@@ -77,12 +77,15 @@
     <canvas id="voteChart"></canvas>
     <button id="nextQuestionButton">Next Question</button>
     <p id="endMessage" style="display: none;">End of the Quiz!</p>
+    <p id="timerDisplay" style="font-size: 1.5em;">Time left: <span id="timer"></span> seconds</p>
 </div>
 
 <script>
-    let currentQuestionNo = 1; // Initial question number
+    let currentQuestionNo = 1;
+    let timerInterval;
+    let timeRemaining = 60;
+    let lastFetchedQuestionNo = null;
 
-    // Chart.js setup
     const ctx = document.getElementById('voteChart').getContext('2d');
     const voteChart = new Chart(ctx, {
         type: 'bar',
@@ -100,21 +103,19 @@
         }
     });
 
-    // Function to fetch and display the current question, options, and vote data
-    function fetchVotes(questionNo) {
+    function fetchVotes(questionNo, isNextQuestion = false) {
         fetch(`http://localhost:9999/androidMobileApp/display?questionNo=${questionNo}`)
             .then(res => res.json())
             .then(data => {
                 if (data.end) {
-                    // No more questions
                     document.getElementById('endMessage').style.display = 'block';
                     document.getElementById('nextQuestionButton').disabled = true;
+                    clearInterval(timerInterval);
                     return;
                 }
 
                 document.getElementById('questionText').textContent = "Q" + questionNo + ": " + data.questionText;
 
-                // Update the vote chart
                 voteChart.data.datasets[0].data = [
                     data.votes.A || 0,
                     data.votes.B || 0,
@@ -123,9 +124,8 @@
                 ];
                 voteChart.update();
 
-                // Dynamically populate options
                 const optionsContainer = document.getElementById('optionsContainer');
-                optionsContainer.innerHTML = '';  // Clear previous options
+                optionsContainer.innerHTML = '';
                 const options = ['A', 'B', 'C', 'D'];
 
                 options.forEach(option => {
@@ -134,25 +134,46 @@
                     optionElement.textContent = `${option}: ${data[`option${option}`]}`;
                     optionsContainer.appendChild(optionElement);
                 });
+
+                // Only reset timer if it's a new question
+                if (isNextQuestion || lastFetchedQuestionNo !== questionNo) {
+                    clearInterval(timerInterval);
+                    timeRemaining = data.timeRemaining;
+                    document.getElementById('timer').textContent = timeRemaining;
+                    startTimer();
+                    lastFetchedQuestionNo = questionNo;
+                }
             })
             .catch(err => {
                 console.error("Error fetching question data:", err);
             });
     }
 
-    // Event listener for the "Next Question" button
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('nextQuestionButton').disabled = true;
+            } else {
+                timeRemaining--;
+                document.getElementById('timer').textContent = timeRemaining;
+            }
+        }, 1000);
+    }
+
     document.getElementById('nextQuestionButton').addEventListener('click', () => {
-        currentQuestionNo++;
-        fetchVotes(currentQuestionNo);  // Fetch and display the next question
+        currentQuestionNo++; // Move to the next question
+        fetchVotes(currentQuestionNo, true); // Force-fetch new question & reset timer
+        document.getElementById('nextQuestionButton').disabled = false; // Re-enable button just in case
     });
 
-    // Periodically check for updates every 5 seconds (can be adjusted)
+
     setInterval(() => {
-        fetchVotes(currentQuestionNo); // Ensure the page is synced with the latest question
+        fetchVotes(currentQuestionNo); // passive refresh without resetting timer
     }, 5000);
 
-    // Initial fetch for the first question
-    fetchVotes(currentQuestionNo);
+    // Initial load
+    fetchVotes(currentQuestionNo, true);
 </script>
 </body>
 </html>
