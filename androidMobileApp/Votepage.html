@@ -112,7 +112,7 @@
                     return;
                 }
 
-                document.getElementById('questionText').textContent = data.questionText;
+                document.getElementById('questionText').textContent = "Q" + questionNo + ": " + data.questionText;
 
                 // Update the vote chart
                 voteChart.data.datasets[0].data = [
@@ -142,16 +142,19 @@
 
     // Event listener for the "Next Question" button
     document.getElementById('nextQuestionButton').addEventListener('click', () => {
-        // Increment the current question number
         currentQuestionNo++;
-
-        // Fetch and display the next question
-        fetchVotes(currentQuestionNo);
+        fetchVotes(currentQuestionNo);  // Fetch and display the next question
     });
+
+    // Periodically check for updates every 5 seconds (can be adjusted)
+    setInterval(() => {
+        fetchVotes(currentQuestionNo); // Ensure the page is synced with the latest question
+    }, 5000);
 
     // Initial fetch for the first question
     fetchVotes(currentQuestionNo);
 </script>
 </body>
 </html>
+
 
