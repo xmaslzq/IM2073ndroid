@@ -52,10 +52,16 @@ public class MainActivity extends AppCompatActivity {
 
                 if (json.has("end")) {
                     runOnUiThread(() -> {
+                        // Display "End of quiz" message
                         TextView questionView = findViewById(R.id.textViewQuestion);
                         questionView.setText("End of quiz.");
-                        Button nextButton = findViewById(R.id.buttonNext);
-                        nextButton.setEnabled(false);  // Disable the Next button
+
+                        // Disable and hide the options and Next button
+                        findViewById(R.id.buttonChoiceA).setVisibility(View.GONE);
+                        findViewById(R.id.buttonChoiceB).setVisibility(View.GONE);
+                        findViewById(R.id.buttonChoiceC).setVisibility(View.GONE);
+                        findViewById(R.id.buttonChoiceD).setVisibility(View.GONE);
+                        findViewById(R.id.buttonNext).setVisibility(View.GONE); // Optionally hide the Next button
                     });
                     return;
                 }
@@ -75,6 +81,13 @@ public class MainActivity extends AppCompatActivity {
                     ((Button) findViewById(R.id.buttonChoiceB)).setText("B: " + optionB);
                     ((Button) findViewById(R.id.buttonChoiceC)).setText("C: " + optionC);
                     ((Button) findViewById(R.id.buttonChoiceD)).setText("D: " + optionD);
+
+                    // Make sure options are visible when a new question is fetched
+                    findViewById(R.id.buttonChoiceA).setVisibility(View.VISIBLE);
+                    findViewById(R.id.buttonChoiceB).setVisibility(View.VISIBLE);
+                    findViewById(R.id.buttonChoiceC).setVisibility(View.VISIBLE);
+                    findViewById(R.id.buttonChoiceD).setVisibility(View.VISIBLE);
+                    findViewById(R.id.buttonNext).setVisibility(View.VISIBLE);
                 });
 
             } catch (Exception e) {
