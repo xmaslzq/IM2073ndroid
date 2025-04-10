@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
                         findViewById(R.id.buttonChoiceB).setVisibility(View.GONE);
                         findViewById(R.id.buttonChoiceC).setVisibility(View.GONE);
                         findViewById(R.id.buttonChoiceD).setVisibility(View.GONE);
-                        findViewById(R.id.buttonNext).setVisibility(View.GONE);
+                        //findViewById(R.id.buttonNext).setVisibility(View.GONE);
                         timerView.setVisibility(View.GONE); // Hide timer
                     });
                     return;
@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                     findViewById(R.id.buttonChoiceB).setVisibility(View.VISIBLE);
                     findViewById(R.id.buttonChoiceC).setVisibility(View.VISIBLE);
                     findViewById(R.id.buttonChoiceD).setVisibility(View.VISIBLE);
-                    findViewById(R.id.buttonNext).setVisibility(View.VISIBLE);
+                    //findViewById(R.id.buttonNext).setVisibility(View.VISIBLE);
                     timerView.setVisibility(View.VISIBLE);
 
                     startTimerCountdown(); // ✨ Start countdown
