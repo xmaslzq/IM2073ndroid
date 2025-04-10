@@ -28,13 +28,65 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView timerView; // ✨ For countdown display
 
+    private Handler questionPollingHandler = new Handler();
+    private Runnable questionPollingRunnable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        timerView = findViewById(R.id.textViewTimer); // ✨ Assume this TextView exists in your layout
-        fetchQuestionFromServer(questionNo);
+        timerView = findViewById(R.id.textViewTimer);
+        fetchQuestionFromServer(questionNo);  // Initial question fetch
+
+        // Start polling the server for the current question number
+        startQuestionPolling();
+    }
+
+    private void startQuestionPolling() {
+        questionPollingRunnable = new Runnable() {
+            @Override
+            public void run() {
+                fetchCurrentQuestionNo();  // Poll the server for the latest question number
+                questionPollingHandler.postDelayed(this, 5000);  // Poll every 5 seconds
+            }
+        };
+        questionPollingHandler.post(questionPollingRunnable);  // Start polling
+    }
+
+    private void fetchCurrentQuestionNo() {
+        new Thread(() -> {
+            try {
+                // Poll the server to get the current question number
+                String urlString = "http://" + serverIp + ":" + serverPort + "/androidMobileApp/questionState";
+                URL url = new URL(urlString);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+
+                // Parse the response to get the current question number
+                JSONObject json = new JSONObject(response.toString());
+                int serverQuestionNo = json.getInt("currentQuestionNo");
+
+                runOnUiThread(() -> {
+                    // Sync the question number on the app side
+                    if (serverQuestionNo != questionNo) {
+                        questionNo = serverQuestionNo;
+                        fetchQuestionFromServer(questionNo);  // Fetch the corresponding question
+                    }
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private void fetchQuestionFromServer(int questionNo) {
@@ -188,6 +240,41 @@ public class MainActivity extends AppCompatActivity {
 
     public void onNextQuestion(View view) {
         questionNo++;
-        fetchQuestionFromServer(questionNo);
+        fetchQuestionFromServer(questionNo);  // Fetch the next question from the server
+        updateQuestionStateOnServer();  // Notify the server about the updated question number
     }
+
+    private void updateQuestionStateOnServer() {
+        new Thread(() -> {
+            try {
+                String urlString = "http://" + serverIp + ":" + serverPort + "/androidMobileApp/questionState";
+                URL url = new URL(urlString);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+
+                // Send the new question number to the server
+                String data = "currentQuestionNo=" + questionNo;
+                conn.getOutputStream().write(data.getBytes());
+
+                // Read the response to ensure it's processed
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+
+                // Handle any response (optional)
+                runOnUiThread(() -> {
+                    // Optional: You can show a Toast or any feedback here
+                    Toast.makeText(MainActivity.this, "Question number updated to " + questionNo, Toast.LENGTH_SHORT).show();
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
 }

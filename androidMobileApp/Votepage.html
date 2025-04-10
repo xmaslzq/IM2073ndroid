@@ -161,12 +161,16 @@
         }, 1000);
     }
 
-    document.getElementById('nextQuestionButton').addEventListener('click', () => {
-        currentQuestionNo++; // Move to the next question
-        fetchVotes(currentQuestionNo, true); // Force-fetch new question & reset timer
-        document.getElementById('nextQuestionButton').disabled = false; // Re-enable button just in case
+    document.getElementById("nextQuestionButton").addEventListener("click", () => {
+        fetch("http://localhost:9999/androidMobileApp/questionState", {
+            method: "POST"
+        })
+        .then(response => response.json())
+        .then(data => {
+            currentQuestionNo = data.currentQuestionNo;
+            fetchVotes(currentQuestionNo, true);
+        });
     });
-
 
     setInterval(() => {
         fetchVotes(currentQuestionNo); // passive refresh without resetting timer
