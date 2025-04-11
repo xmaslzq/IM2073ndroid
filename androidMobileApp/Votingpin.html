@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Pin</title>
+</head>
+<body>
+<button onclick="generatePin()">Generate Pin</button>
+<div id="pinDisplay"></div>
+
+<script>
+    function generatePin() {
+        fetch('http://localhost:9999/androidMobileApp/pinServlet?action=generate')  // URL mapping to PinServlet for pin generation
+            .then(response => response.text())
+            .then(pin => {
+                document.getElementById('pinDisplay').textContent = "Your Pin: " + pin;
+                // Optionally, store the pin in sessionStorage/localStorage for later use
+            });
+    }
+</script>
+</body>
+</html>

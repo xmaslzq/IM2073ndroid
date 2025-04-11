@@ -1,0 +1,28 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/pin_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter your 6-digit Pin:"
+        android:textSize="18sp"/>
+
+    <EditText
+        android:id="@+id/pinInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLength="6"
+        android:inputType="number"
+        android:hint="Pin"
+        android:textSize="18sp"/>
+
+    <Button
+        android:id="@+id/submitPin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Submit PIN"/>
+</LinearLayout>

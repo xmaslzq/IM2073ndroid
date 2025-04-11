@@ -10,16 +10,24 @@
         android:theme="@style/CustomTheme"
         android:networkSecurityConfig="@xml/network_security_config">
 
-        <!-- Main Activity -->
-        <activity android:name=".MainActivity"
-            android:label="Clicker"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-            android:exported="true"> <!-- Added android:exported here -->
+        <!-- Pin Activity (First screen where PIN is entered) -->
+        <activity android:name=".PinActivity"
+            android:label="Enter PIN"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Main Activity (Voting screen, navigated to after successful PIN entry) -->
+        <activity android:name=".MainActivity"
+            android:label="Clicker"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:exported="true">
+        </activity>
+
     </application>
 
 </manifest>
