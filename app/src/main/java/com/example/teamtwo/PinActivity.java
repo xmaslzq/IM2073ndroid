@@ -4,15 +4,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Intent;
+import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;import android.content.Intent;
-import android.util.Log;
+import java.net.URL;
 
 public class PinActivity extends AppCompatActivity {
 
@@ -71,8 +71,6 @@ public class PinActivity extends AppCompatActivity {
                             Toast.makeText(PinActivity.this, "Invalid Pin", Toast.LENGTH_SHORT).show();
                         });
                     }
-
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

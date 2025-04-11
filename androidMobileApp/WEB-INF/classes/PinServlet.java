@@ -20,12 +20,12 @@ public class PinServlet extends HttpServlet {
             // Send the generated pin as the response
             response.getWriter().write(pin);
         } else if ("validate".equals(action)) {
-            // Validate pin and delete it after successful validation
+            // Validate pin and update its status after successful validation
             String pin = request.getParameter("pin");
             if (pin != null && !pin.isEmpty()) {
                 boolean isValid = validatePin(pin);
                 if (isValid) {
-                    deletePin(pin); // Delete the pin after it's validated
+                    updatePinStatus(pin); // Update the pin status to 'validated'
                     response.getWriter().write("valid");
                 } else {
                     response.getWriter().write("invalid");
@@ -33,6 +33,10 @@ public class PinServlet extends HttpServlet {
             } else {
                 response.getWriter().write("invalid");
             }
+        } else if ("check".equals(action)) {
+            String pin = request.getParameter("pin");
+            String status = checkPinStatus(pin);
+            response.getWriter().write(status);
         }
     }
 
@@ -71,16 +75,33 @@ public class PinServlet extends HttpServlet {
         }
     }
 
-    // Method to delete the pin from the database after successful validation
-    private void deletePin(String pin) {
+    // Method to update the pin's status to 'validated'
+    private void updatePinStatus(String pin) {
         try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ebookshop", "root", "xxxx")) {
-            String deleteQuery = "DELETE FROM pins WHERE pin = ?";
-            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteQuery)) {
-                deleteStmt.setString(1, pin);
-                deleteStmt.executeUpdate();
+            String updateQuery = "UPDATE pins SET status = 'validated' WHERE pin = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+                stmt.setString(1, pin);
+                stmt.executeUpdate();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    // Method to check the pin's status from the database
+    private String checkPinStatus(String pin) {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/ebookshop", "root", "xxxx")) {
+            String query = "SELECT status FROM pins WHERE pin = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, pin);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    return rs.getString("status");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "unknown";
     }
 }

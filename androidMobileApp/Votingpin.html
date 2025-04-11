@@ -10,14 +10,30 @@
 <div id="pinDisplay"></div>
 
 <script>
+    let currentPin = null;
     function generatePin() {
-        fetch('http://localhost:9999/androidMobileApp/pinServlet?action=generate')  // URL mapping to PinServlet for pin generation
+        fetch('http://localhost:9999/androidMobileApp/pinServlet?action=generate')
             .then(response => response.text())
             .then(pin => {
+                currentPin = pin;
                 document.getElementById('pinDisplay').textContent = "Your Pin: " + pin;
-                // Optionally, store the pin in sessionStorage/localStorage for later use
+                startPolling();
             });
+    }
+
+    function startPolling() {
+        const interval = setInterval(() => {
+            fetch(`http://localhost:9999/androidMobileApp/pinServlet?action=check&pin=${currentPin}`)
+                .then(response => response.text())
+                .then(status => {
+                    if (status.trim() === "validated") {
+                        clearInterval(interval);
+                        window.location.href = "http://localhost:9999/androidMobileApp/Votepage.html";
+                    }
+                });
+        }, 3000); // Poll every 3 seconds
     }
 </script>
 </body>
 </html>
+

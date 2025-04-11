@@ -40,7 +40,7 @@ public class LoginServlet extends HttpServlet {
                 // Valid credentials, create a session
                 HttpSession session = request.getSession();
                 session.setAttribute("username", username);
-                response.sendRedirect("Votepage.html");  // Redirect to homepage
+                response.sendRedirect("Votingpin.html");  // Redirect to homepage
             } else {
                 // Invalid credentials, redirect with an error message
                 response.sendRedirect("login.html?error=Invalid username or password");
